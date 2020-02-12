@@ -1,0 +1,33 @@
+#in this route, we added a prefix /melis
+#because we wan't our route to access
+#data in the Melis Platform Back office
+#if you didn't put a /melis in your route
+#then it will get the data from the front (site)
+
+symfonytpl_get_tool:
+  path: /melis/symfonytpl/tool
+  controller: App\Bundle\SymfonyTpl\Controller\SampleEntityController::getSymfonyTplTool
+
+symfonytpl_get_data:
+  path: /melis/symfonytpl/get-data
+  controller: App\Bundle\SymfonyTpl\Controller\SampleEntityController::getSampleEntityData
+
+#Get form - if id is not null, the form will be filled with data based on given id
+symfonytpl_get_form:
+  path: /melis/symfonytpl/form/{id}
+  controller : App\Bundle\SymfonyTpl\Controller\SampleEntityController::getSymfonyTplSavingTypeForm
+  defaults:   { id: 0 }
+  methods: GET|HEAD
+
+#Save
+save_symfonytpl:
+  path: /melis/symfonytpl/save/{id}
+  controller: App\Bundle\SymfonyTpl\Controller\SampleEntityController::save
+  defaults:   { id: 0 }
+  methods: POST
+
+#Delete
+delete_symfonytpl:
+  path: /melis/symfonytpl/delete
+  controller: App\Bundle\SymfonyTpl\Controller\SampleEntityController::deleteSampleEntity
+  methods: POST

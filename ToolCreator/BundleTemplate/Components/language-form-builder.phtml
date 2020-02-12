@@ -1,0 +1,34 @@
+$entity = $this->toolService->getEntity($this->getDoctrine(), $entityName, "findBy", ['secondary_tbl_pt_id' => $id]);
+                    $languages = $this->toolService->getCmsLanguages();
+                    $forms = [];
+                    /**
+                     * This will create a form per language
+                     */
+                    foreach($languages as $key => $lang){
+                        $langId = $lang['lang_cms_id'];
+                        $found = false;
+                        /**
+                         * Create form per language
+                         */
+                        foreach($entity as $ent) {
+                            if($ent->getLanguageFkId() == $langId) {
+                                $forms[$langId] = $this->createForm($formTypeName, $ent, [
+                                    'attr' => [
+                                        'id' => $formId
+                                    ]
+                                ])->createView();
+                                $found = true;
+                                break;
+                            }
+                        }
+                        //create a blank form for other language
+                        if(!$found){
+                            $forms[$langId] = $this->createForm($formTypeName, new $entityName(), [
+                                'attr' => [
+                                    'id' => $formId
+                                ]
+                            ])->createView();
+                        }
+                    }
+                    $param['form'] = $forms;
+                    $param['languages'] = $languages;

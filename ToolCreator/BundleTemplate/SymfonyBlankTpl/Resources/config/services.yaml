@@ -1,0 +1,6 @@
+services:
+  #registering a locale listener to use the melis platform language with higher priority
+  App\Bundle\SymfonyTpl\EventListener\LocaleListener:
+    arguments: ['@service_container']
+    tags:
+      - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest, priority: 100 }

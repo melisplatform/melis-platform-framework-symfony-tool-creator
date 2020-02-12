@@ -1,0 +1,37 @@
+<?php
+
+return [
+    'symfony_tpl' => [
+        'table' => [
+            'symfony_tpl_table' => [
+                'ajaxUrl' => '/melis/symfonytpl/get-data',
+                'dataFunction' => '',
+                'ajaxCallback' => '',
+                'attributes' => [
+                    'id' => 'symfonyTplTable',
+                    'class' => 'table table-striped table-primary dt-responsive nowrap',
+                    'cellspacing' => 0,
+                    'width' => '100%'
+                ],
+                'filters' => [
+                    'left' => [
+                        'show' => 'l'
+                    ],
+                    'center' => [
+                        'search' => 'f'
+                    ],
+                    'right' => [
+                        'refresh' => '<a class="btn btn-default melis-refreshTable" data-toggle="tab" aria-expanded="true" title="Refresh"><i class="fa fa-refresh"></i></a>'
+                    ]
+                ],
+                'columns' => [],
+                'searchables' => [],
+                'actionButtons' => [
+                    'edit' => '<button class="btn btn-success symfonytpl-btn-update" title="Edit"><i class="fa fa-pencil"></i></button>',
+                    'delete' => '<a class="btn btn-danger symfonytpl-btn-delete" title="Delete"><i class="fa fa-times"> </i></a>'
+                ],
+                'columnDisplay' => [],
+            ]
+        ],
+    ]
+];

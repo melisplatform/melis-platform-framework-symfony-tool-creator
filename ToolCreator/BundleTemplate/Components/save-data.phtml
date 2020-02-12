@@ -1,0 +1,68 @@
+    /**
+     * @param $id
+     * @param Request $request
+     * @return JsonResponse
+     * @throws \Exception
+     */
+    public function save($id, Request $request): JsonResponse
+    {
+        try {
+            $itemId = null;
+            $result = [
+                'id' => $id,
+                'title' => 'SymfonyTpl',
+                'success' => true,
+                'message' => '',
+                'errors' => []
+            ];
+            $translator = $this->get('translator');
+            /**
+            * Set transaction so that we can rollback
+            * the db if there are some error occurred
+            */
+            $this->connection->beginTransaction();
+            try {
+                if ($request->getMethod() == 'POST') {
+                    //save SampleEntity
+                    $resSampleEntity = $this->saveSampleEntity($id, $request);
+                    if ($resSampleEntity['success']) {
+                        $itemId = $resSampleEntity['id'];
+                        $result['id'] = $itemId;
+                    } else {
+                        $result['errors'] = array_merge($result['errors'], $resSampleEntity['errors']);
+                        $result['success'] = false;
+                    }
+
+                    /**
+                     * Check if the saving is success
+                     */
+                    if($result['success']){
+                        $result['message'] = (empty($id)) ? $translator->trans('tool_symfony_tpl_successfully_saved') : $translator->trans('tool_symfony_tpl_successfully_updated');
+                        $icon = 'fa fa-info-circle';
+                        //commit the data
+                        $this->connection->commit();
+                    }else{
+                        $icon = 'fa fa-exclamation-triangle';
+                        $result['message'] = (empty($id)) ? $translator->trans('tool_symfony_tpl_unable_to_save') : $translator->trans('tool_symfony_tpl_unable_to_update');
+                        //rollback the db
+                        $this->connection->rollBack();
+                    }
+                }
+            } catch (\Exception $ex) {
+                $result['message'] = $ex->getMessage();
+                $icon = 'fa fa-exclamation-triangle';
+                //rollback the db
+                $this->connection->rollBack();
+            }
+
+            $typeCode = (empty($id)) ? 'SYMFONYTPL_TOOL_SAVE' : 'SYMFONYTPL_TOOL_UPDATE';
+            //add message notification
+            $this->toolService->addToFlashMessenger($result['title'], $result['message'], $icon);
+            //save logs
+            $this->toolService->saveLogs($result['title'], $result['message'], $result['success'], $typeCode, $itemId);
+
+            return new JsonResponse($result);
+        }catch (\Exception $ex){
+            exit($ex->getMessage());
+        }
+    }

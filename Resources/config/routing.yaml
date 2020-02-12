@@ -1,0 +1,3 @@
+create_bundle_route:
+  path: /melis/symfony-module-create
+  controller: MelisPlatformFrameworksSymfonyToolCreator\Controller\ModuleController::createSymfonyModule

@@ -1,0 +1,3 @@
+symfonytpl_get_tool:
+  path: /melis/symfonytpl/tool
+  controller: App\Bundle\SymfonyTpl\Controller\IndexController::getSymfonyTplTool

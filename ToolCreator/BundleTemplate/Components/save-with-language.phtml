@@ -1,0 +1,219 @@
+    /**
+     * @param $id
+     * @param Request $request
+     * @return JsonResponse
+     * @throws \Exception
+     */
+    public function save($id, Request $request): JsonResponse
+    {
+        try {
+            $itemId = null;
+            $result = [
+                'id' => $id,
+                'title' => 'SymfonyTpl',
+                'success' => true,
+                'message' => '',
+                'errors' => []
+            ];
+            $langData = [];
+            $translator = $this->get('translator');
+            /**
+            * Set transaction so that we can rollback
+            * the db if there are some error occurred
+            */
+            $this->connection->beginTransaction();
+            try {
+                if ($request->getMethod() == 'POST') {
+                    /**
+                     * remove language tab data if exist
+                     * and store it temporarily
+                     */
+                    if (!empty($request->request->all()['language'])) {
+                        $langData = $request->request->all()['language'];
+                        $request->request->remove('language');
+                    }
+                    //save SampleEntity
+                    $resSampleEntity = $this->saveSampleEntity($id, $request);
+
+                    if ($resSampleEntity['success']) {
+                        $itemId = $resSampleEntity['id'];
+                        //execute saving SampleLanguageEntity
+                        if(!empty($langData)) {
+                            $langResult = $this->saveSampleLanguageEntity($itemId, $request, $langData, $id);
+                            if(!$langResult['success']){
+                                $result['errors'] = array_merge($result['errors'], $langResult['errors']);
+                                $result['success'] = false;
+                            }else{
+                                $result['id'] = $itemId;
+                            }
+                        }
+                    } else {
+                        $result['errors'] = array_merge($result['errors'], $resSampleEntity['errors']);
+                        $result['success'] = false;
+                    }
+
+                    /**
+                     * Check if the saving is success
+                     */
+                    if($result['success']){
+                        $result['message'] = (empty($id)) ? $translator->trans('tool_symfony_tpl_successfully_saved') : $translator->trans('tool_symfony_tpl_successfully_updated');
+                        $icon = 'fa fa-info-circle';
+                        //commit the data
+                        $this->connection->commit();
+                    }else{
+                        $icon = 'fa fa-exclamation-triangle';
+                        $result['message'] = (empty($id)) ? $translator->trans('tool_symfony_tpl_unable_to_save') : $translator->trans('tool_symfony_tpl_unable_to_update');
+                        //rollback db
+                        $this->connection->rollBack();
+                    }
+                }
+            } catch (\Exception $ex) {
+                $result['message'] = $ex->getMessage();
+                $icon = 'fa fa-exclamation-triangle';
+                //rollback db
+                $this->connection->rollBack();
+            }
+
+            $typeCode = (empty($id)) ? 'SYMFONYTPL_TOOL_SAVE' : 'SYMFONYTPL_TOOL_UPDATE';
+            //add message notification
+            $this->toolService->addToFlashMessenger($result['title'], $result['message'], $icon);
+            //save logs
+            $this->toolService->saveLogs($result['title'], $result['message'], $result['success'], $typeCode, $itemId);
+
+            return new JsonResponse($result);
+        }catch (\Exception $ex){
+            exit($ex->getMessage());
+        }
+    }
+
+    /**
+     * @param $sampleEntityId
+     * @param $request
+     * @param $data
+     * @param $selectedId
+     * @return array
+     */
+    private function saveSampleLanguageEntity($sampleEntityId, Request $request, $data, $selectedId)
+    {
+        /**
+         * Prepare the results
+         */
+        $result = [
+            'errors' => [],
+            'success' => false,
+        ];
+
+        /**
+         * Check data in every language
+         * so that we can insert a record
+         * even if the other language form is empty
+         */
+        $langList = [];
+        foreach($data as $languageId => $val) {
+            //exclude _token
+            if(!empty($val['_token']))
+                unset($val['_token']);
+
+            if(!$this->toolService->isArrayEmpty($val))
+                $langList[] = $languageId;
+        }
+
+        //try to get SampleLanguageEntity data
+        $dataSampleLanguageEntity = $this->toolService->getEntity($this->getDoctrine(), 'App\Bundle\SymfonyTpl\Entity\SampleLanguageEntity', "findBy", ['secondary_tbl_pt_id' => $sampleEntityId]);
+        //loop trough every language data
+        foreach($data as $languageId => $val) {
+            /**
+             * Duplicate the request to override the data
+             * so that we can validate our form per language
+             */
+            $request = $request->duplicate([], $val);
+            /**
+             * Process Saving records
+             */
+            if (!empty($selectedId)) {
+                /**
+                 * Let's check if the given data is empty
+                 * to delete it
+                 */
+                //exclude _token
+                $validateData = $val;
+                if(!empty($validateData['_token']))
+                    unset($validateData['_token']);
+
+                if($this->toolService->isArrayEmpty($validateData) && !empty($dataSampleLanguageEntity)) {
+                    $entityManager = $this->getDoctrine()->getManager();
+                    foreach ($dataSampleLanguageEntity as $entity) {
+                        if ($entity->getLanguageFkId() == $languageId) {
+                            try {
+                                $id = $this->toolService->getEntityPrimaryIdValue($entityManager, $entity);
+                                $entity = $entityManager->getRepository(get_class($entity))->find($id);
+                                $entityManager->remove($entity);
+                                $entityManager->flush();
+                                $result['success'] = true;
+                            } catch (\Exception $ex) {
+                                $result['success'] = false;
+                            }
+                        }
+                    }
+                }else {
+                    $languageFound = false;
+                    foreach ($dataSampleLanguageEntity as $entity) {
+                        if ($entity->getLanguageFkId() == $languageId) {
+                            /**
+                             * Update record
+                             */
+                            $form = $this->createForm(SampleLanguageEntityFormType::class, $entity);
+                            $this->validatedAndSave($result, $form, $request, $entity);
+                            //if the validation is not success, then we stop and return the error
+                            if (!$result['success'])
+                                return $result;
+
+                            $languageFound = true;
+                            break;
+                        }
+                    }
+
+                    if (!$languageFound) {
+                        /**
+                         * Insert new record
+                         */
+                        $this->saveSampleLanguageEntityNewRecord($result, $sampleEntityId, $languageId, $request);
+                        //if the validation is not success, then we stop and return the error
+                        if (!$result['success'])
+                            return $result;
+                    }
+                }
+            } else {
+                /**
+                 * Insert new record
+                 */
+                if(in_array($languageId, $langList) || empty($langList)) {
+                    $this->saveSampleLanguageEntityNewRecord($result, $sampleEntityId, $languageId, $request);
+                    //if the validation is not success, then we stop and return the error
+                    if(!$result['success'])
+                        return $result;
+                }
+            }
+        }
+        return $result;
+    }
+
+    /**
+    * @param $result
+    * @param $sampleEntityId
+    * @param $languageId
+    * @param $request
+    */
+    private function saveSampleLanguageEntityNewRecord(&$result, $sampleEntityId, $languageId, $request)
+    {
+        $entity = new SampleLanguageEntity();
+        //set SampleEntity
+        $sampleEntityEntity = $this->toolService->getEntity($this->getDoctrine(), 'App\Bundle\SymfonyTpl\Entity\SampleEntity', "find", $sampleEntityId);
+        $entity->setSecondaryTblPtId($sampleEntityEntity);
+        //set language id
+        if(empty($entity->getLanguageFkId()))
+            $entity->setLanguageFkId($languageId);
+
+        $form = $this->createForm(SampleLanguageEntityFormType::class, $entity);
+        $this->validatedAndSave($result, $form, $request, $entity);
+    }

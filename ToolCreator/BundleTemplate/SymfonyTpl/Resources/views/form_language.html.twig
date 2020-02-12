@@ -1,0 +1,54 @@
+<div class="tab-content">
+    <div class="tab-pane active" id="id_meliscms_tool_sites_site_translations_modal_edit">
+        <div class="row">
+            <div class="col-xs-12 col-md-4">
+                <div class="product-text-tab-container">
+                    <ul class="nav-tabs product-text-tab">
+                        {% for key,lang in languages %}
+                            {% set locale = languages[key]['lang_cms_locale'] %}
+                            {% set langId = languages[key]['lang_cms_id'] %}
+                            {% if key == 0 %}
+                                {% set active = 'active' %}
+                            {% else %}
+                                {% set active = '' %}
+                            {% endif %}
+                            <li class="{{ active }}">
+                                <a class="clearfix" data-toggle="tab" href="#symfony_tpl_tool_{{ langId }}" aria-expanded="true" data-env-id="1">
+                                    <span class="pull-right">
+                                        <img src="/MelisCms/images/lang-flags/{{ locale }}.png" class="pull-right">
+                                    </span>
+                                    <span>{{ languages[key]['lang_cms_name'] }}</span>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            <div class="col-xs-12 col-md-8">
+                <div class="tab-content">
+                    {% set ctr = 0 %}
+                    {% for langId,f in form %}
+                        {% if ctr == 0 %}
+                            {% set active = 'active' %}
+                        {% else %}
+                            {% set active = '' %}
+                        {% endif %}
+                        {% set ctr = ctr + 1 %}
+
+                        <div id="symfony_tpl_tool_{{ langId }}" class="tab-pane product-text-tab-content {{ active }}">
+                            {{ form_start(f, {'attr': {'id': f.vars.attr['id'] ~ '-' ~ langId, 'class' : f.vars.attr['id'], 'data-lang-id': langId}}) }}
+                            {% for key,field in f.children %}
+                                {% if field.vars['id'] == '_token' %}
+                                    {{ form_row(field) }}
+                                {% else %}
+                                    {{ form_row(field, {'id': field.vars['id'] ~ '-' ~ langId}) }}
+                                {% endif %}
+                            {% endfor %}
+                            {{ form_end(f) }}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

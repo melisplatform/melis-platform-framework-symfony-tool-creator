@@ -1,0 +1,46 @@
+<div class="me-heading bg-white border-bottom">
+    <div class="row">
+        <div class="me-hl col-xs-12 col-sm-8 col-md-9">
+            <h1 class="content-heading">{% trans %}tool_symfony_tpl_title{% endtrans %}</h1>
+        </div>
+        <div class="me-hr col-xs-12 col-sm-4 col-md-3">
+            <button type="button" class="btn btn-success" id="{{ tabConfig['btnSubmitId'] }}">{{ tabConfig['btnSubmitText'] }}</button>
+        </div>
+    </div>
+</div>
+<div class="widget widget-tabs widget-tabs-double-2 widget-tabs-responsive">
+    <div class="widget-head nav">
+        <ul class="tabs-label nav-tabs">
+            {% set ctr = 0 %}
+            {% for tabName,config in tabConfig['tabs'] %}
+                {% if ctr == 0 %}
+                    {% set active = 'active' %}
+                {% else %}
+                    {% set active = '' %}
+                {% endif %}
+                {% set ctr = ctr + 1 %}
+                <li class="{{ active }}">
+                    <a href="#{{ tabName }}" class="{{ config['class'] }}" data-toggle="tab" aria-expanded="true"><i></i>
+                        <span>{{ config['title'] }}</span>
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+<div class="tab-content innerAll spacing-x2 symfonytpl-form-container-{{ id }}">
+    {% set ctr = 0 %}
+    {% for name,form in data %}
+        {% if ctr == 0 %}
+            {% set active = 'active' %}
+        {% else %}
+            {% set active = '' %}
+        {% endif %}
+        {% set ctr = ctr + 1 %}
+        <div class="tab-pane {{ active }}" id="{{ name }}">
+            <div class="row">
+                {{ form|raw }}
+            </div>
+        </div>
+    {% endfor %}
+</div>

@@ -1,0 +1,32 @@
+/**
+            * get the data that the language is equal to the current language
+            * of the back office only
+            */
+            if (!empty($tableData[$ctr]["secondaryTableName"])) {
+               $flag = false;
+               foreach ($tableData[$ctr]['secondaryTableName'] as $k => $val) {
+               //check language if equal to the BO
+               if ($val["languageFkId"] == $this->melisServiceManager()->getMelisLangId()) {
+                        unset($tableData[$ctr]["secondaryTableName"]);
+                        $tableData[$ctr] = array_merge($tableData[$ctr], $val);
+                        $flag = true;
+                        break;
+                    }
+                }
+                /**
+                 * if there is no language found equal to the back office,
+                 * then we get the first data we found
+                 */
+                if (!$flag) {
+                    //lets get data from different language
+                    $tableData[$ctr] = array_merge($tableData[$ctr], $tableData[$ctr]["secondaryTableName"][0]);
+                    unset($tableData[$ctr]["secondaryTableName"]);
+                }
+            }
+            /**
+             * in most cases, samplePrimaryId is empty because
+             * language data is overriding it, so let's re
+             * assign it's value
+             */
+            if(empty($tableData[$ctr]['samplePrimaryId']))
+                $tableData[$ctr]['samplePrimaryId'] = $samplePrimaryId;
