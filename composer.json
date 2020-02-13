@@ -29,5 +29,10 @@
   },
   "require": {
     "melisplatform/melis-platform-framework-symfony": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "MelisPlatformFrameworksSymfonyToolCreator\\": ""
+    }
   }
 }
