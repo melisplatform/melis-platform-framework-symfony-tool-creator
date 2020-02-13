@@ -39,7 +39,7 @@ class ModuleController extends AbstractController
     private $pre_add_trans = [
         'en' => [
             'tool_symfony_tpl_tab_properties' => 'Properties',
-            'tool_symfony_tpl_tab_language' => 'Language',
+            'tool_symfony_tpl_tab_language_text' => 'Text',
             'tool_symfony_tpl_common_add' => 'Add',
             'tool_symfony_tpl_successfully_saved' => 'Item successfully saved',
             'tool_symfony_tpl_successfully_updated' => 'Item successfully updated',
@@ -54,7 +54,7 @@ class ModuleController extends AbstractController
         ],
         'fr' => [
             'tool_symfony_tpl_tab_properties' => 'Propriétés',
-            'tool_symfony_tpl_tab_language' => 'Langage',
+            'tool_symfony_tpl_tab_language_text' => 'Textes',
             'tool_symfony_tpl_common_add' => 'Ajouter',
             'tool_symfony_tpl_successfully_saved' => 'Elément sauvegardé avec succès',
             'tool_symfony_tpl_successfully_updated' => 'Elément mis à jour avec succès',
@@ -461,7 +461,7 @@ class ModuleController extends AbstractController
                              * Add language tab on modal
                              */
                             if ($this->has_language) {
-                                $modalLangTab = $this->getModalTabs('tab_language', 'tool_symfony_tpl_tab_language',
+                                $modalLangTab = $this->getModalTabs('tab_language', 'tool_symfony_tpl_tab_language_text',
                                     'glyphicons language', 'symfonytpl_lang_form', $this->st_entity_name, 'form_language.html.twig');
                                 $configSavingType[$type]['symfony_tpl_' . $type]['tabs'] = array_merge($configSavingType[$type]['symfony_tpl_' . $type]['tabs'], $modalLangTab);
                             } else {
