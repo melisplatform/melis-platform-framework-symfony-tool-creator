@@ -149,12 +149,9 @@ $(document).ready(function(){
                  */
                 modal.find(".modal-content #loader").removeClass('hidden');
                 modal.find(".modal-content .modal-body").addClass('hidden');
+
                 /**
-                 * we need to modify a little bit the modal
-                 * like changing the text and icon of the header to
-                 * determine whether we are going to update or
-                 * create a record since we are using one
-                 * modal for both update and create
+                 * Update tab icon
                  */
                 var title =  modal.find("li.active").find("a");
                 title.removeClass("tag");
@@ -179,6 +176,24 @@ $(document).ready(function(){
                 $.each(data, function(key, content){
                     modal.find(".tab-content #"+key).html(content);
                 });
+
+                var li = modal.find("ul.tab-header li");
+                var tabContent = modal.find("div.tab-content div.tab-header-content");
+                reInitTab(li);
+                reInitTab(tabContent);
+            }
+        });
+    }
+
+    function reInitTab(element)
+    {
+        $(element).each(function(i, el){
+            if(i == 0){
+                $(this).addClass("active");
+                $(this).find("a.li-anchor").addClass("active");
+            }else{
+                $(this).removeClass("active");
+                $(this).find("a.li-anchor").removeClass("active");
             }
         });
     }
