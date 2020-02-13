@@ -50,6 +50,7 @@ class ModuleController extends AbstractController
             'tool_symfony_tpl_confirm_modal_title' => 'Delete Item',
             'tool_symfony_tpl_confirm_modal_message' => 'Are you sure you want to delete this item?',
             'tool_symfony_tpl_successfully_deleted' => 'Item successfully deleted.',
+            'tool_symfony_tpl_common_save' => 'Save',
         ],
         'fr' => [
             'tool_symfony_tpl_tab_properties' => 'Propriétés',
@@ -64,6 +65,7 @@ class ModuleController extends AbstractController
             'tool_symfony_tpl_confirm_modal_title' => 'Supprimer l\'élément',
             'tool_symfony_tpl_confirm_modal_message' => 'Etes-vous sûr de vouloir supprimer cet élément ?',
             'tool_symfony_tpl_successfully_deleted' => 'Élément supprimé avec succès',
+            'tool_symfony_tpl_common_save' => 'Enregistrer',
         ]
     ];
     private $searchableCols = [];
@@ -446,7 +448,7 @@ class ModuleController extends AbstractController
                                 [
                                     'symfony_tpl_' . $type => [
                                         'id' => 'symfonyTpl' . ucfirst($type),
-                                        'btnSubmitText' => 'Save',
+                                        'btnSubmitText' => 'tool_symfony_tpl_common_save',
                                         'btnSubmitId' => 'btn-save-symfonytpl',
                                         'tabs' => []
                                     ]

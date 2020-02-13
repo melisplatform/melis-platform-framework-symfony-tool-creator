@@ -1,4 +1,4 @@
-# melis-platform-frameworks-symfony-tool-creator
+# melis-platform-framework-symfony-tool-creator
 This Symfony module makes the business logic of creating Symfony tools
 
 ## Getting Started
@@ -14,7 +14,7 @@ It will automatically be done when using composer.
 Run the composer command:
 
 ```
-composer require melisplatform/melis-platform-frameworks-symfony-tool-creator
+composer require melisplatform/melis-platform-framework-symfony-tool-creator
 ```
 
 ### Activating the module
