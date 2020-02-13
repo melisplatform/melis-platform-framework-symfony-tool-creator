@@ -28,7 +28,7 @@ return [
     ...
     etc.
     //Melis Platform Custom Bundles
-    MelisPlatformFrameworksSymfonyToolCreator\MelisPlatformFrameworksSymfonyToolCreatorBundle::class => ['all' => true]
+    MelisPlatformFrameworkSymfonyToolCreator\MelisPlatformFrameworkSymfonyToolCreatorBundle::class => ['all' => true]
 ];
 ```
 ## Authors

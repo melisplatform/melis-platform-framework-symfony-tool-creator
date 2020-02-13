@@ -1,4 +1,4 @@
 services:
-  MelisPlatformFrameworksSymfonyToolCreator\Controller\ModuleController:
+  MelisPlatformFrameworkSymfonyToolCreator\Controller\ModuleController:
     autowire: true
     public: true

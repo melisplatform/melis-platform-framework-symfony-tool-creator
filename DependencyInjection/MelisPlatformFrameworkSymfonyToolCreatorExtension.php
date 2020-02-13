@@ -1,13 +1,13 @@
 <?php
 
-namespace MelisPlatformFrameworksSymfonyToolCreator\DependencyInjection;
+namespace MelisPlatformFrameworkSymfonyToolCreator\DependencyInjection;
 
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
-class MelisPlatformFrameworksSymfonyToolCreatorExtension extends Extension
+class MelisPlatformFrameworkSymfonyToolCreatorExtension extends Extension
 {
     /**
      * @param array $configs

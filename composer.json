@@ -25,14 +25,14 @@
   ],
   "extra": {
     "melis-module": false,
-    "module-name": "MelisPlatformFrameworksSymfonyToolCreator"
+    "module-name": "MelisPlatformFrameworkSymfonyToolCreator"
   },
   "require": {
     "melisplatform/melis-platform-framework-symfony": "*"
   },
   "autoload": {
     "psr-4": {
-      "MelisPlatformFrameworksSymfonyToolCreator\\": ""
+      "MelisPlatformFrameworkSymfonyToolCreator\\": ""
     }
   }
 }

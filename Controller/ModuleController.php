@@ -1,6 +1,6 @@
 <?php
 
-namespace MelisPlatformFrameworksSymfonyToolCreator\Controller;
+namespace MelisPlatformFrameworkSymfonyToolCreator\Controller;
 
 use http\Exception\InvalidArgumentException;
 use MelisPlatformFrameworkSymfony\MelisServiceManager;
