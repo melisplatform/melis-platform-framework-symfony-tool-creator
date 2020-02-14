@@ -669,7 +669,9 @@ class ModuleController extends AbstractController
                                 $value = str_replace('tool_symfony_tpl_', '', $key);
                                 $value = str_replace('_', ' ', $value);
                                 $value = str_replace('tooltip', '', $value);
-                                $transData[$local][$key] = ucfirst($value);
+                                //dont set translation to tool description, let it empty if its empty
+                                if($value != 'desc')
+                                    $transData[$local][$key] = ucfirst($value);
                             }
                         }
                     }
