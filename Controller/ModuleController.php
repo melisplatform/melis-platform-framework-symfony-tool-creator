@@ -237,11 +237,11 @@ class ModuleController extends AbstractController
                                          * the query
                                          */
                                         $this->updateRepository($destination);
-                                        /**
-                                         * Let's put the assets inside the Zend Module that we created
-                                         */
-                                        $this->processAssets();
                                     }
+                                    /**
+                                     * Let's put the assets inside the Zend Module that we created
+                                     */
+                                    $this->processAssets();
                                     /**
                                      * After we successfully created the bundle
                                      * and adding the assets,
@@ -561,7 +561,10 @@ class ModuleController extends AbstractController
     public function processAssets()
     {
         $publicDir = $this->zendModuleDir.'/public/';
-        if(is_dir($publicDir) && file_exists($publicDir)){
+        if(!file_exists($publicDir))
+            mkdir($publicDir, 0777);
+
+        if(is_writable($publicDir)){
             $jsDir = $publicDir.'js';
             $cssDir = $publicDir.'css';
             if(!file_exists($jsDir))
@@ -571,10 +574,16 @@ class ModuleController extends AbstractController
 
             //get the js file
             $jsFileTemplate = $this->assetsDir.'/js';
-            if($this->savingType == 'tab')
-                $jsFileTemplate .= '/tab.js';
-            else
-                $jsFileTemplate .= '/modal.js';
+            if($this->toolType == 'db') {
+                if ($this->savingType == 'tab')
+                    $jsFileTemplate .= '/tab.js';
+                else
+                    $jsFileTemplate .= '/modal.js';
+            }elseif($this->toolType == 'blank'){
+                $jsFileTemplate .= '/blank.js';
+            }else{
+                $jsFileTemplate .= '/blank.js';
+            }
 
             if(file_exists($jsFileTemplate)){
                 $jsContent = file_get_contents($jsFileTemplate);
@@ -596,7 +605,6 @@ class ModuleController extends AbstractController
                 $cssContent = file_get_contents($cssFileTemplate);
                 $this->createFilesAndReplaceTexts($cssContent, '', '',$cssDir.'/tool.css');
             }
-
         }
     }
 
