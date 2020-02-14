@@ -50,6 +50,7 @@ class ModuleController extends AbstractController
             'tool_symfony_tpl_confirm_modal_title' => 'Delete Item',
             'tool_symfony_tpl_confirm_modal_message' => 'Are you sure you want to delete this item?',
             'tool_symfony_tpl_successfully_deleted' => 'Item successfully deleted.',
+            'tool_symfony_tpl_cannot_delete' => 'Unable to delete item.',
             'tool_symfony_tpl_common_save' => 'Save',
         ],
         'fr' => [
@@ -65,6 +66,7 @@ class ModuleController extends AbstractController
             'tool_symfony_tpl_confirm_modal_title' => 'Supprimer l\'élément',
             'tool_symfony_tpl_confirm_modal_message' => 'Etes-vous sûr de vouloir supprimer cet élément ?',
             'tool_symfony_tpl_successfully_deleted' => 'Élément supprimé avec succès',
+            'tool_symfony_tpl_cannot_delete' => 'Impossible de supprimer le élément',
             'tool_symfony_tpl_common_save' => 'Enregistrer',
         ]
     ];
