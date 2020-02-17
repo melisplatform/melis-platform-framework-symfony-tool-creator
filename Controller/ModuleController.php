@@ -598,14 +598,16 @@ class ModuleController extends AbstractController
                     $find[] = '//LANGUAGE_FORM_ERRORS';
                     $replace[] = '';
                 }
-                $this->createFilesAndReplaceTexts($jsContent, $find, $replace,$jsDir.'/tool.js');
+                if(!file_exists($jsDir.'/tool.js'))
+                    $this->createFilesAndReplaceTexts($jsContent, $find, $replace,$jsDir.'/tool.js');
             }
 
             //get css file
             $cssFileTemplate = $this->assetsDir.'/css/tool.css';
             if(file_exists($cssFileTemplate)){
                 $cssContent = file_get_contents($cssFileTemplate);
-                $this->createFilesAndReplaceTexts($cssContent, '', '',$cssDir.'/tool.css');
+                if(!file_exists($cssDir.'/tool.css'))
+                    $this->createFilesAndReplaceTexts($cssContent, '', '',$cssDir.'/tool.css');
             }
         }
     }
