@@ -133,6 +133,7 @@ class ModuleController extends AbstractController
 
         if(!empty($data['step1']['tcf-name'])){
             //get module name
+            $data['step1']['tcf-name'] = ucfirst($data['step1']['tcf-name']);
             $this->module_name = $this->generateCase($data['step1']['tcf-name'], 3);
             //get saving type
             $this->savingType = $data['step1']['tcf-tool-edit-type'] ?? 'modal';
