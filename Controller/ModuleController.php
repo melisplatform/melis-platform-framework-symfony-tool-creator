@@ -133,8 +133,8 @@ class ModuleController extends AbstractController
 
         if(!empty($data['step1']['tcf-name'])){
             //get module name
-            $data['step1']['tcf-name'] = ucfirst($data['step1']['tcf-name']);
-            $this->module_name = $this->generateCase($data['step1']['tcf-name'], 3);
+            $this->module_name = ucfirst(strtolower($data['step1']['tcf-name']));
+
             //get saving type
             $this->savingType = $data['step1']['tcf-tool-edit-type'] ?? 'modal';
             $this->toolType = $data['step1']['tcf-tool-type'] ?? 'db';
@@ -151,7 +151,7 @@ class ModuleController extends AbstractController
             $destination = $frameworkDir . '/src/Bundle/' . $this->module_name;
             $this->componentsDir = dirname(__FILE__) . '/../ToolCreator/BundleTemplate/Components';
             $this->assetsDir = dirname(__FILE__) . '/../ToolCreator/BundleTemplate/Assets';
-            $this->zendModuleDir = $_SERVER['DOCUMENT_ROOT'] . '/../module/'.ucfirst(strtolower($this->module_name));
+            $this->zendModuleDir = $_SERVER['DOCUMENT_ROOT'] . '/../module/'.$this->module_name;
             ;
 
             //check if framework exist
