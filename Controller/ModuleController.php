@@ -1093,7 +1093,7 @@ class ModuleController extends AbstractController
                      * foreign key to connect with the first table
                      */
                     $getterSetter .= "\t/**\n\t".'* @ORM\ManyToOne(targetEntity="'.$this->pt_entity_name.'", inversedBy="'.$this->secondary_table.'")'."\n\t".
-                        '* @ORM\JoinColumn(name="'.$this->st_pk.'", referencedColumnName="'.$this->pt_pk.'")'."\n\t*/";
+                        '* @ORM\JoinColumn(name="'.$this->st_fk.'", referencedColumnName="'.$this->pt_pk.'")'."\n\t*/";
                     $type = $this->pt_entity_name;
                 }else{
                     if(!empty($assoc)){
