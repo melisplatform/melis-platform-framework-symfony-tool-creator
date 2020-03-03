@@ -28,7 +28,7 @@
     "module-name": "MelisPlatformFrameworkSymfonyToolCreator"
   },
   "require": {
-    "melisplatform/melis-platform-framework-symfony": "*"
+    "melisplatform/melis-platform-framework-symfony": "^3.2"
   },
   "autoload": {
     "psr-4": {
