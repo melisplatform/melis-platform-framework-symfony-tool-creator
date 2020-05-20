@@ -12,8 +12,8 @@ use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Contracts\EventDispatcher\Event;
-use Zend\Config\Writer\PhpArray;
-use Zend\Session\Container;
+use Laminas\Config\Writer\PhpArray;
+use Laminas\Session\Container;
 
 class ModuleController extends AbstractController
 {

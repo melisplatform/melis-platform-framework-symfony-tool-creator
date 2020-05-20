@@ -1,7 +1,7 @@
 {% extends '@SymfonyTpl/base.html.twig' %}
 {% block body %}
     {#    Create table using melis helper#}
-    {{ melis_helper('melisdatatable', 'createTable', tableConfig)|raw }}
+    {{ melis_helper('MelisDataTable', 'createTable', tableConfig)|raw }}
 
     {#MAKE_MODAL#}
 {% endblock %}

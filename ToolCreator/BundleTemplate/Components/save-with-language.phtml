@@ -6,84 +6,80 @@
      */
     public function save($id, Request $request): JsonResponse
     {
+        $itemId = null;
+        $result = [
+            'id' => $id,
+            'title' => 'SymfonyTpl',
+            'success' => true,
+            'message' => '',
+            'errors' => []
+        ];
+        $langData = [];
+        $translator = $this->get('translator');
+        /**
+        * Set transaction so that we can rollback
+        * the db if there are some error occurred
+        */
+        $this->connection->beginTransaction();
         try {
-            $itemId = null;
-            $result = [
-                'id' => $id,
-                'title' => 'SymfonyTpl',
-                'success' => true,
-                'message' => '',
-                'errors' => []
-            ];
-            $langData = [];
-            $translator = $this->get('translator');
-            /**
-            * Set transaction so that we can rollback
-            * the db if there are some error occurred
-            */
-            $this->connection->beginTransaction();
-            try {
-                if ($request->getMethod() == 'POST') {
-                    /**
-                     * remove language tab data if exist
-                     * and store it temporarily
-                     */
-                    if (!empty($request->request->all()['language'])) {
-                        $langData = $request->request->all()['language'];
-                        $request->request->remove('language');
-                    }
-                    //save SampleEntity
-                    $resSampleEntity = $this->saveSampleEntity($id, $request);
-
-                    if ($resSampleEntity['success']) {
-                        $itemId = $resSampleEntity['id'];
-                        //execute saving SampleLanguageEntity
-                        if(!empty($langData)) {
-                            $langResult = $this->saveSampleLanguageEntity($itemId, $request, $langData, $id);
-                            if(!$langResult['success']){
-                                $result['errors'] = array_merge($result['errors'], $langResult['errors']);
-                                $result['success'] = false;
-                            }else{
-                                $result['id'] = $itemId;
-                            }
-                        }
-                    } else {
-                        $result['errors'] = array_merge($result['errors'], $resSampleEntity['errors']);
-                        $result['success'] = false;
-                    }
-
-                    /**
-                     * Check if the saving is success
-                     */
-                    if($result['success']){
-                        $result['message'] = (empty($id)) ? $translator->trans('tool_symfony_tpl_successfully_saved') : $translator->trans('tool_symfony_tpl_successfully_updated');
-                        $icon = 'fa fa-info-circle';
-                        //commit the data
-                        $this->connection->commit();
-                    }else{
-                        $icon = 'fa fa-exclamation-triangle';
-                        $result['message'] = (empty($id)) ? $translator->trans('tool_symfony_tpl_unable_to_save') : $translator->trans('tool_symfony_tpl_unable_to_update');
-                        //rollback db
-                        $this->connection->rollBack();
-                    }
+            if ($request->getMethod() == 'POST') {
+                /**
+                 * remove language tab data if exist
+                 * and store it temporarily
+                 */
+                if (!empty($request->request->all()['language'])) {
+                    $langData = $request->request->all()['language'];
+                    $request->request->remove('language');
                 }
-            } catch (\Exception $ex) {
-                $result['message'] = $ex->getMessage();
-                $icon = 'fa fa-exclamation-triangle';
-                //rollback db
-                $this->connection->rollBack();
+                //save SampleEntity
+                $resSampleEntity = $this->saveSampleEntity($id, $request);
+
+                if ($resSampleEntity['success']) {
+                    $itemId = $resSampleEntity['id'];
+                    //execute saving SampleLanguageEntity
+                    if(!empty($langData)) {
+                        $langResult = $this->saveSampleLanguageEntity($itemId, $request, $langData, $id);
+                        if(!$langResult['success']){
+                            $result['errors'] = array_merge($result['errors'], $langResult['errors']);
+                            $result['success'] = false;
+                        }else{
+                            $result['id'] = $itemId;
+                        }
+                    }
+                } else {
+                    $result['errors'] = array_merge($result['errors'], $resSampleEntity['errors']);
+                    $result['success'] = false;
+                }
+
+                /**
+                 * Check if the saving is success
+                 */
+                if($result['success']){
+                    $result['message'] = (empty($id)) ? $translator->trans('tool_symfony_tpl_successfully_saved') : $translator->trans('tool_symfony_tpl_successfully_updated');
+                    $icon = 'fa fa-info-circle';
+                    //commit the data
+                    $this->connection->commit();
+                }else{
+                    $icon = 'fa fa-exclamation-triangle';
+                    $result['message'] = (empty($id)) ? $translator->trans('tool_symfony_tpl_unable_to_save') : $translator->trans('tool_symfony_tpl_unable_to_update');
+                    //rollback db
+                    $this->connection->rollBack();
+                }
             }
-
-            $typeCode = (empty($id)) ? 'SYMFONYTPL_TOOL_SAVE' : 'SYMFONYTPL_TOOL_UPDATE';
-            //add message notification
-            $this->toolService->addToFlashMessenger($result['title'], $result['message'], $icon);
-            //save logs
-            $this->toolService->saveLogs($result['title'], $result['message'], $result['success'], $typeCode, $itemId);
-
-            return new JsonResponse($result);
-        }catch (\Exception $ex){
-            exit($ex->getMessage());
+        } catch (\Exception $ex) {
+            $result['message'] = $ex->getMessage();
+            $icon = 'fa fa-exclamation-triangle';
+            //rollback db
+            $this->connection->rollBack();
         }
+
+        $typeCode = (empty($id)) ? 'SYMFONYTPL_TOOL_SAVE' : 'SYMFONYTPL_TOOL_UPDATE';
+        //add message notification
+        $this->toolService->addToFlashMessenger($result['title'], $result['message'], $icon);
+        //save logs
+        $this->toolService->saveLogs($result['title'], $result['message'], $result['success'], $typeCode, $itemId);
+
+        return new JsonResponse($result);
     }
 
     /**
