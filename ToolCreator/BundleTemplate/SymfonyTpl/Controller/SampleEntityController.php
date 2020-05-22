@@ -73,17 +73,13 @@ class SampleEntityController extends AbstractController
      */
     public function getSymfonyTplTool(): Response
     {
-        try {
-            $view = $this->render('@SymfonyTpl/lists.html.twig',
-                [
-                    "tableConfig" => $this->getTableConfig(),
-                    //SAVING_TYPE
-                ])->getContent();
+        $view = $this->render('@SymfonyTpl/lists.html.twig',
+            [
+                "tableConfig" => $this->getTableConfig(),
+                //SAVING_TYPE
+            ])->getContent();
 
-            return new Response($view);
-        }catch (\Exception $ex){
-            exit($ex->getMessage());
-        }
+        return new Response($view);
     }
 
     /**
@@ -238,46 +234,42 @@ class SampleEntityController extends AbstractController
      */
     private function validatedAndSave(&$result, $form, $request, $entity)
     {
-        try {
-            $entityManager = $this->getDoctrine()->getManager();
-            $form->handleRequest($request);
-            //validate form
-            if ($form->isSubmitted() && $form->isValid()) {
-                /**
-                 * Check if there are some files needed to upload
-                 */
-                foreach ($request->files->all() as $fieldName => $file) {
-                    //create setter function name to set the file
-                    $fName = $this->toolService->generateFunctionName($fieldName);
-                    $fName = 'set' . $fName;
-                    $methods = get_class_methods(get_class($entity));
-                    if (in_array($fName, $methods)) {
-                        if (!empty($file))
-                            $fileValue = $this->toolService->upload($file);
-                        else
-                            $fileValue = $request->request->get($fieldName . '_value');
+        $entityManager = $this->getDoctrine()->getManager();
+        $form->handleRequest($request);
+        //validate form
+        if ($form->isSubmitted() && $form->isValid()) {
+            /**
+             * Check if there are some files needed to upload
+             */
+            foreach ($request->files->all() as $fieldName => $file) {
+                //create setter function name to set the file
+                $fName = $this->toolService->generateFunctionName($fieldName);
+                $fName = 'set' . $fName;
+                $methods = get_class_methods(get_class($entity));
+                if (in_array($fName, $methods)) {
+                    if (!empty($file))
+                        $fileValue = $this->toolService->upload($file);
+                    else
+                        $fileValue = $request->request->get($fieldName . '_value');
 
-                        $entity->$fName($fileValue);
-                    }
+                    $entity->$fName($fileValue);
                 }
-
-                $entity = $form->getData();
-                // tell Doctrine you want to (eventually) save the data (no queries yet)
-                $entityManager->persist($entity);
-                // executes the queries
-                $entityManager->flush();
-
-                /**
-                 * get the primary key identifier of the entity
-                 * so that we can return it's value
-                 */
-                $result['id'] = $this->toolService->getEntityPrimaryIdValue($entityManager, $entity);
-                $result['success'] = true;
-            } else {
-                $result['errors'] = array_merge($result['errors'], $this->toolService->getErrorsFromForm($form));
-                $result['success'] = false;
             }
-        }catch (\Exception $ex){
+
+            $entity = $form->getData();
+            // tell Doctrine you want to (eventually) save the data (no queries yet)
+            $entityManager->persist($entity);
+            // executes the queries
+            $entityManager->flush();
+
+            /**
+             * get the primary key identifier of the entity
+             * so that we can return it's value
+             */
+            $result['id'] = $this->toolService->getEntityPrimaryIdValue($entityManager, $entity);
+            $result['success'] = true;
+        } else {
+            $result['errors'] = array_merge($result['errors'], $this->toolService->getErrorsFromForm($form));
             $result['success'] = false;
         }
     }
@@ -301,17 +293,14 @@ class SampleEntityController extends AbstractController
             'success' => false,
             'message' => $translator->trans('tool_symfony_tpl_cannot_delete'),
         ];
-        try {
-            $entityManager = $this->getDoctrine()->getManager();
-            $entity = $entityManager->getRepository(SampleEntity::class)->find($id);
-            $entityManager->remove($entity);
-            $entityManager->flush();
-            $result['message'] = $translator->trans('tool_symfony_tpl_successfully_deleted');
-            $result['success'] = true;
-            $icon = 'fa fa-info-circle';
-        }catch (\Exception $ex){
-            //cannot delete item
-        }
+
+        $entityManager = $this->getDoctrine()->getManager();
+        $entity = $entityManager->getRepository(SampleEntity::class)->find($id);
+        $entityManager->remove($entity);
+        $entityManager->flush();
+        $result['message'] = $translator->trans('tool_symfony_tpl_successfully_deleted');
+        $result['success'] = true;
+        $icon = 'fa fa-info-circle';
 
         //add message notification
         $this->toolService->addToFlashMessenger($result['title'], $result['message'], $icon);
