@@ -1219,7 +1219,7 @@ class ModuleController extends AbstractController
                 }
             }elseif($field == 'MelisCoreTinyMCE') {
                 $opt['type'] = '\MelisPlatformFrameworkSymfony\Form\Type\MelisTinyMceType';
-            }elseif($field == "Datepicker" || $field == "Datetimepicker"){
+            }elseif(strtolower($field) == "datepicker" || strtolower($field) == "datetimepicker"){
                 $opt['type'] = '\MelisPlatformFrameworkSymfony\Form\Type\MelisDateType';
                 $format = ($field == 'Datepicker') ? 'YYYY-MM-DD' : 'YYYY-MM-DD HH:mm:ss';
                 $opt['attr'] = ",\n\t\t\t\t'attr' => [
