@@ -38,8 +38,10 @@
         {% endif %}
         {% set ctr = ctr + 1 %}
         <div class="tab-pane {{ active }}" id="{{ name }}">
-            <div class="row">
+            <div class="col-md-12">
+                <div class="row">
                 {{ form|raw }}
+                </div>
             </div>
         </div>
     {% endfor %}
