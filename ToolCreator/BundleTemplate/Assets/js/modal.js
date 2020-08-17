@@ -102,7 +102,7 @@ $(document).ready(function(){
             processData: false,
             beforeSend: function(){
                 //disable button
-                $("#btn-save-calendar").attr("disabled", true);
+                $("#btn-save-symfonytpl").attr("disabled", true);
                 //disable all fields
                 $("#symfonytpl_prop_form :input").prop("disabled", true);
             },
@@ -124,7 +124,7 @@ $(document).ready(function(){
                     //LANGUAGE_FORM_ERRORS
                 }
                 //enable save button
-                $("#btn-save-calendar").attr("disabled", false);
+                $("#btn-save-symfonytpl").attr("disabled", false);
                 //enable form fields
                 $("#symfonytpl_prop_form :input").prop("disabled", false);
             }

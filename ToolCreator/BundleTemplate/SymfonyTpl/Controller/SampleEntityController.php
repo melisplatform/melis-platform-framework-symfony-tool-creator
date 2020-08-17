@@ -293,7 +293,6 @@ class SampleEntityController extends AbstractController
             'success' => false,
             'message' => $translator->trans('tool_symfony_tpl_cannot_delete'),
         ];
-
         $entityManager = $this->getDoctrine()->getManager();
         $entity = $entityManager->getRepository(SampleEntity::class)->find($id);
         $entityManager->remove($entity);

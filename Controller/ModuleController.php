@@ -12,8 +12,8 @@ use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Contracts\EventDispatcher\Event;
-use Zend\Config\Writer\PhpArray;
-use Zend\Session\Container;
+use Laminas\Config\Writer\PhpArray;
+use Laminas\Session\Container;
 
 class ModuleController extends AbstractController
 {
@@ -1219,7 +1219,7 @@ class ModuleController extends AbstractController
                 }
             }elseif($field == 'MelisCoreTinyMCE') {
                 $opt['type'] = '\MelisPlatformFrameworkSymfony\Form\Type\MelisTinyMceType';
-            }elseif($field == "Datepicker" || $field == "Datetimepicker"){
+            }elseif(strtolower($field) == "datepicker" || strtolower($field) == "datetimepicker"){
                 $opt['type'] = '\MelisPlatformFrameworkSymfony\Form\Type\MelisDateType';
                 $format = ($field == 'Datepicker') ? 'YYYY-MM-DD' : 'YYYY-MM-DD HH:mm:ss';
                 $opt['attr'] = ",\n\t\t\t\t'attr' => [
