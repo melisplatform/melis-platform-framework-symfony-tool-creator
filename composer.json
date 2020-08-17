@@ -29,7 +29,7 @@
 	},
 	"require": {
 		"php": "^7.1.3|^7.2|^7.3",
-		"melisplatform/melis-platform-framework-symfony": "*"
+		"melisplatform/melis-platform-framework-symfony": "^4.0"
 	},
 	"autoload": {
 		"psr-4": {
