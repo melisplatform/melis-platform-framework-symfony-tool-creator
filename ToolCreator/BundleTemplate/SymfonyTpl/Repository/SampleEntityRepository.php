@@ -5,6 +5,7 @@ namespace App\Bundle\SymfonyTpl\Repository;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use App\Bundle\SymfonyTpl\Entity\SampleEntity;
 use Symfony\Bridge\Doctrine\RegistryInterface;
+use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @method SampleEntity|null find($id, $lockMode = null, $lockVersion = null)
@@ -21,9 +22,9 @@ class SampleEntityRepository extends ServiceEntityRepository
     protected $totalFilteredRecord;
 
     /**
-     * @param RegistryInterface $registry
+     * @param ManagerRegistry $registry
      */
-    public function __construct(RegistryInterface $registry)
+    public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, SampleEntity::class);
     }

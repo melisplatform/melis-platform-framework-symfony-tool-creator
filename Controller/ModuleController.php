@@ -14,6 +14,7 @@ use Symfony\Component\Yaml\Yaml;
 use Symfony\Contracts\EventDispatcher\Event;
 use Laminas\Config\Writer\PhpArray;
 use Laminas\Session\Container;
+use Doctrine\DBAL\Types\Type;
 
 class ModuleController extends AbstractController
 {
@@ -1102,8 +1103,8 @@ class ModuleController extends AbstractController
                         //Apply column type
                         if(!empty($columnType)){
                             if(array_key_exists($column, $columnType)){
-                                $colT = strtolower($columnType[$column]);
-                                $colT = preg_replace('/[^A-Za-z0-9\-]/', '', $colT);
+                                $colT = $columnType[$column];
+                                $colT = $colT->getName();
                                 if($colT == 'integer') {
                                     $type = 'int';
                                     $colType = $colT;

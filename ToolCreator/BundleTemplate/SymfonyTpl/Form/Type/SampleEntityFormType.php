@@ -42,10 +42,10 @@ class SampleEntityFormType extends AbstractType
      * so that we can use some of the
      * melis javascript helper and tool
      *
-     * @return string|null
+     * @return string
      */
     public function getBlockPrefix()
     {
-        return null;
+        return '';
     }
 }
