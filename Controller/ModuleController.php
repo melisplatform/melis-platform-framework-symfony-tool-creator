@@ -401,6 +401,29 @@ class ModuleController extends AbstractController
     }
 
     /**
+     * this will get the default value for each column in the given table
+     * @param $tableName
+     * @return array
+     * @throws \Exception
+     */
+    private function getTableColumnDefaultValue($tableName)
+    {
+        try {
+            $columnDefaultValue = [];
+            if ($this->has('doctrine.dbal.default_connection')) {
+                $conn = $this->get('doctrine.dbal.default_connection');
+                $sm = $conn->getSchemaManager();
+                $columns = $sm->listTableColumns($tableName);
+                foreach ($columns as $column) {
+                    $columnDefaultValue[$column->getName()] = $column->getDefault();
+                }
+            }
+            return $columnDefaultValue;
+        }catch (\Exception $ex){
+            throw new \Exception('Error on getting column default value');
+        }
+    }
+    /**
      * Create module config
      *
      * @param $data
@@ -1128,8 +1151,25 @@ class ModuleController extends AbstractController
             }
         }
 
+        $defaultValue = null;
+        if ($isPrimaryTable) {
+            $firstTableColDefValue = $this->getTableColumnDefaultValue($this->primary_table);
+            $defaultValue = $firstTableColDefValue[$column];
+        } else {
+            $secondaryTableColDefValue = $this->getTableColumnDefaultValue($this->secondary_table);
+            $defaultValue = $secondaryTableColDefValue[$column];
+        }
+        if(array_key_exists($column, $columnType)){
+            $colT1 = $columnType[$column];
+            $colT2 = $colT1->getName();            
+        }
+        //set the default value only if the field type is not datetime and not null
+        if ($defaultValue != 'NULL' && $defaultValue != null && $colT2 != 'datetime') {
+            $getterSetter .= "\n\tprivate $".$column." = ".$defaultValue.";\n\n";
+        } else {
         //variables
         $getterSetter .= "\n\tprivate $".$column.";\n\n";
+        }
         //getters
         $getterSetter .= "\tpublic function get".$funcName."(): ?".$type."\n".
                         "\t{\n".
