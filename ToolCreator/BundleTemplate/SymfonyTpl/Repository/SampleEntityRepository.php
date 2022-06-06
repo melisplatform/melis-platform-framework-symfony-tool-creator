@@ -48,14 +48,9 @@ class SampleEntityRepository extends ServiceEntityRepository
             }
             $qb->setParameter('search', '%'.$search.'%');
         }
-        if (!empty($orderBy)) {
-            if (in_array($orderBy, $cols)) {                
-                $qb->orderBy("b.$orderBy", $order);
-            }
-            else {
-            $qb->orderBy("a.$orderBy", $order);
-            }  
-        }
+
+        //ORDER
+      
         //set total filtered record without limit
         $this->setTotalFilteredRecord($qb->getQuery()->getResult());
 
