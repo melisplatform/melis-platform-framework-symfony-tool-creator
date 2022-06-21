@@ -14,6 +14,7 @@ use Symfony\Component\Yaml\Yaml;
 use Symfony\Contracts\EventDispatcher\Event;
 use Laminas\Config\Writer\PhpArray;
 use Laminas\Session\Container;
+use Doctrine\DBAL\Types\Type;
 
 class ModuleController extends AbstractController
 {
@@ -400,6 +401,29 @@ class ModuleController extends AbstractController
     }
 
     /**
+     * this will get the default value for each column in the given table
+     * @param $tableName
+     * @return array
+     * @throws \Exception
+     */
+    private function getTableColumnDefaultValue($tableName)
+    {
+        try {
+            $columnDefaultValue = [];
+            if ($this->has('doctrine.dbal.default_connection')) {
+                $conn = $this->get('doctrine.dbal.default_connection');
+                $sm = $conn->getSchemaManager();
+                $columns = $sm->listTableColumns($tableName);
+                foreach ($columns as $column) {
+                    $columnDefaultValue[$column->getName()] = $column->getDefault();
+                }
+            }
+            return $columnDefaultValue;
+        }catch (\Exception $ex){
+            throw new \Exception('Error on getting column default value');
+        }
+    }
+    /**
      * Create module config
      *
      * @param $data
@@ -520,6 +544,7 @@ class ModuleController extends AbstractController
     public function updateRepository($modulePath)
     {
         $search = '$qb->orWhere("a.$column LIKE :search");';
+        $order = '$qb->orderBy("a.$orderBy", $order);';
         $repoFileName = $modulePath.'/Repository/'.ucfirst($this->pt_entity_name).'Repository.php';
         if($this->has_language) {
             //remove non searchable columns
@@ -547,15 +572,26 @@ class ModuleController extends AbstractController
                         $qb->orWhere("a.$column LIKE :search");
                     }';
 
+            $order = '
+            if (!empty($orderBy)) {
+                if (in_array($orderBy, $cols)) {                
+                    $qb->orderBy("b.$orderBy", $order);
+                }
+                else {
+                    $qb->orderBy("a.$orderBy", $order);
+                }  
+            }';
             //second table repository
             $stRepo = $modulePath.'/Repository/'.ucfirst($this->st_entity_name).'Repository.php';
             $this->replaceFileTextContent($stRepo, $stRepo, '//JOIN', '');
             $this->replaceFileTextContent($stRepo, $stRepo, '//WHERE', '$qb->orWhere("a.$column LIKE :search");');
+            $this->replaceFileTextContent($stRepo, $stRepo, '//ORDER', '$qb->orderBy("a.$orderBy", $order);');
         }else{
             $str = '';
         }
         $this->replaceFileTextContent($repoFileName, $repoFileName, '//JOIN', $str);
         $this->replaceFileTextContent($repoFileName, $repoFileName, '//WHERE', $search);
+        $this->replaceFileTextContent($repoFileName, $repoFileName, '//ORDER', $order);
     }
 
     /**
@@ -777,8 +813,10 @@ class ModuleController extends AbstractController
                 $fieldsInfo = $data['step5'];
                 $st_builder = '$builder';
                 $st_getterSetter = '';
+                $st_defaultValue = '';
                 $pt_builder = '$builder';
                 $pt_getterSetter = '';
+                $pt_defaultValue = '';
                 $stBuilderViewTransformer = '';
                 $ptBuilderViewTransformer = '';
                 $stFileValidations = '';
@@ -832,6 +870,8 @@ class ModuleController extends AbstractController
                     $pt_getterSetter = $this->constructEntitySettersGetters($pt_getterSetter, $columnName,
                         $isPrimary, null, 'string', null, true,
                         $ptOtherFields);
+                    $pt_defaultValue = $this->constructDefaultValue($pt_defaultValue, $columnName,
+                        true);
                 }
                 //secondary table
                 foreach($stOtherFields as $columnName => $columnType){
@@ -839,6 +879,8 @@ class ModuleController extends AbstractController
                     $st_getterSetter = $this->constructEntitySettersGetters($st_getterSetter, $columnName,
                         $isPrimary, null, 'string', null, false,
                         $stOtherFields);
+                    $st_defaultValue = $this->constructDefaultValue($st_defaultValue, $columnName,
+                        false);
                 }
 
                 /**
@@ -859,6 +901,7 @@ class ModuleController extends AbstractController
                     $fileName = $modulePath.'/Entity/'.$this->st_entity_name.'.php';
                     $this->createFilesAndReplaceTexts($entity_content,'//ENTITY_SETTERS_GETTERS', $st_getterSetter, $fileName);
                     $this->replaceFileTextContent($fileName, $fileName, '//FILE_FIELDS_VALIDATION', $stFileValidations);
+                    $this->replaceFileTextContent($fileName, $fileName, '//DEFAULTS', $st_defaultValue);
                     //FORM BUILDER
                     //include builder view transformer
                     $st_builder = $st_builder.$stBuilderViewTransformer;
@@ -880,6 +923,7 @@ class ModuleController extends AbstractController
                 //Create primary table entity
                 $this->replaceFileTextContent($entity_filename, $entity_filename, '//ENTITY_SETTERS_GETTERS', $pt_getterSetter);
                 $this->replaceFileTextContent($entity_filename, $entity_filename, '//FILE_FIELDS_VALIDATION', $ptFileValidations);
+                $this->replaceFileTextContent($entity_filename, $entity_filename, '//DEFAULTS', $pt_defaultValue);
                 //Create primary table form builder
                 //include builder view transformer
                 $pt_builder = $pt_builder.$ptBuilderViewTransformer;
@@ -1102,8 +1146,8 @@ class ModuleController extends AbstractController
                         //Apply column type
                         if(!empty($columnType)){
                             if(array_key_exists($column, $columnType)){
-                                $colT = strtolower($columnType[$column]);
-                                $colT = preg_replace('/[^A-Za-z0-9\-]/', '', $colT);
+                                $colT = $columnType[$column];
+                                $colT = $colT->getName();
                                 if($colT == 'integer') {
                                     $type = 'int';
                                     $colType = $colT;
@@ -1127,8 +1171,10 @@ class ModuleController extends AbstractController
             }
         }
 
+                
         //variables
         $getterSetter .= "\n\tprivate $".$column.";\n\n";
+
         //getters
         $getterSetter .= "\tpublic function get".$funcName."(): ?".$type."\n".
                         "\t{\n".
@@ -1144,6 +1190,32 @@ class ModuleController extends AbstractController
         }
 
         return $getterSetter;
+    }
+    /**
+     * @param $defaultVal
+     * @param string $column
+     * @param bool $isPrimaryTable
+     * @return string
+     */
+    private function constructDefaultValue(&$defaultVal, $column, $isPrimaryTable)
+    {     
+        $defaultValue = null;
+        if ($isPrimaryTable) {
+            $tableColDefValue = $this->getTableColumnDefaultValue($this->primary_table); 
+        } else {
+            $tableColDefValue = $this->getTableColumnDefaultValue($this->secondary_table);           
+        }
+        $defaultValue = $tableColDefValue[$column];
+        //set the default value only if the field type is not null
+        if ($defaultValue != 'NULL' && $defaultValue != null) {
+            if ($defaultValue == 'current_timestamp()') {
+                $defaultVal .= "\n\t\t\$curDate = new \DateTime();\n";
+                $defaultVal .= "\n\t\t\$this->".$column." = \$curDate->format('Y-m-d H:i:s');\n";
+            } else {
+                $defaultVal .= "\n\t\t\$this->".$column." = ".$defaultValue.";\n";
+            }            
+        } 
+        return $defaultVal;
     }
 
     /**

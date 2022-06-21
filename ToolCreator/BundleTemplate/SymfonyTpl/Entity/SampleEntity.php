@@ -16,6 +16,9 @@ class SampleEntity
 {
     //ENTITY_SETTERS_GETTERS
 
+    public function __construct() {
+        //DEFAULTS
+    }
     /**
      * Add callback to add
      * some validations specially
