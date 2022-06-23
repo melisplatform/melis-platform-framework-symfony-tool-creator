@@ -1208,7 +1208,7 @@ class ModuleController extends AbstractController
         $defaultValue = $tableColDefValue[$column];
         //set the default value only if the field type is not null
         if ($defaultValue != 'NULL' && $defaultValue != null) {
-            if ($defaultValue == 'current_timestamp()') {
+            if ($defaultValue == 'current_timestamp()' || $defaultValue == 'CURRENT_TIMESTAMP') {
                 $defaultVal .= "\n\t\t\$curDate = new \DateTime();\n";
                 $defaultVal .= "\n\t\t\$this->".$column." = \$curDate->format('Y-m-d H:i:s');\n";
             } else {
