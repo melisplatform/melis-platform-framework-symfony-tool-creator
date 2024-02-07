@@ -4,6 +4,7 @@ namespace App\Bundle\SymfonyTpl\Controller;
 
 use App\Bundle\SymfonyTpl\Service\SymfonyTplService;
 use Doctrine\DBAL\Connection;
+use Doctrine\Persistence\ManagerRegistry;
 use MelisPlatformFrameworkSymfony\MelisServiceManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -24,18 +25,24 @@ class IndexController extends AbstractController
      * @var $connection
      */
     protected $connection;
+    /**
+     * @var
+     */
+    protected $doctrine;
 
     /**
-     * SampleEntityController constructor.
+     * IndexController constructor.
      * @param ParameterBagInterface $parameterBag
+     * @param ManagerRegistry $doctrine
      * @param SymfonyTplService $toolService
      * @param Connection $connection
      */
-    public function __construct(ParameterBagInterface $parameterBag, SymfonyTplService $toolService, Connection $connection)
+    public function __construct(ParameterBagInterface $parameterBag, ManagerRegistry $doctrine, SymfonyTplService $toolService, Connection $connection)
     {
         $this->parameters = $parameterBag;
         $this->toolService = $toolService;
         $this->connection = $connection;
+        $this->doctrine = $doctrine;
     }
 
     /**
@@ -47,7 +54,7 @@ class IndexController extends AbstractController
      *
      * @return array
      */
-    public static function getSubscribedServices()
+    public static function getSubscribedServices(): array
     {
         return array_merge(parent::getSubscribedServices(),
         [

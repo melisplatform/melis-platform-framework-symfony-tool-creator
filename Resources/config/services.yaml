@@ -1,4 +1,7 @@
 services:
   MelisPlatformFrameworkSymfonyToolCreator\Controller\ModuleController:
     autowire: true
-    public: true
+    public: true,
+    arguments: ['@service_container', '@melis_platform.service_manager'],
+    calls:
+      - setContainer: ['@service_container']

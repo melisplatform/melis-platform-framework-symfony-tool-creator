@@ -8,10 +8,9 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Mapping\ClassMetadata;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Table(name="sample_table_name")
- * @ORM\Entity(repositoryClass="App\Bundle\SymfonyTpl\Repository\SampleEntityRepository")
- */
+
+#[ORM\Table(name:"sample_table_name")]
+#[ORM\Entity(repositoryClass:"App\Bundle\SymfonyTpl\Repository\SampleEntityRepository")]
 class SampleEntity
 {
     //ENTITY_SETTERS_GETTERS

@@ -6,28 +6,28 @@
 
 symfonytpl_get_tool:
   path: /melis/symfonytpl/tool
-  controller: App\Bundle\SymfonyTpl\Controller\SampleEntityController::getSymfonyTplTool
+  controller: App\Bundle\SymfonyTpl\Controller\SymfonyTplController::getSymfonyTplTool
 
 symfonytpl_get_data:
   path: /melis/symfonytpl/get-data
-  controller: App\Bundle\SymfonyTpl\Controller\SampleEntityController::getSampleEntityData
+  controller: App\Bundle\SymfonyTpl\Controller\SymfonyTplController::getSampleEntityData
 
 #Get form - if id is not null, the form will be filled with data based on given id
 symfonytpl_get_form:
   path: /melis/symfonytpl/form/{id}
-  controller : App\Bundle\SymfonyTpl\Controller\SampleEntityController::getSymfonyTplSavingTypeForm
+  controller : App\Bundle\SymfonyTpl\Controller\SymfonyTplController::getSymfonyTplSavingTypeForm
   defaults:   { id: 0 }
   methods: GET|HEAD
 
 #Save
 save_symfonytpl:
   path: /melis/symfonytpl/save/{id}
-  controller: App\Bundle\SymfonyTpl\Controller\SampleEntityController::save
+  controller: App\Bundle\SymfonyTpl\Controller\SymfonyTplController::save
   defaults:   { id: 0 }
   methods: POST
 
 #Delete
 delete_symfonytpl:
   path: /melis/symfonytpl/delete
-  controller: App\Bundle\SymfonyTpl\Controller\SampleEntityController::deleteSampleEntity
+  controller: App\Bundle\SymfonyTpl\Controller\SymfonyTplController::deleteSampleEntity
   methods: POST

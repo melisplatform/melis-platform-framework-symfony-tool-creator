@@ -7,6 +7,7 @@ use App\Bundle\SymfonyTpl\Service\SymfonyTplService;
 use App\Bundle\SymfonyTpl\Entity\SampleEntity;
 use App\Bundle\SymfonyTpl\Form\Type\SampleEntityFormType;
 use Doctrine\DBAL\Connection;
+use Doctrine\Persistence\ManagerRegistry;
 use MelisPlatformFrameworkSymfony\MelisServiceManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -19,7 +20,7 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-class SampleEntityController extends AbstractController
+class SymfonyTplController extends AbstractController
 {
     /**
      * Store all the parameters
@@ -34,18 +35,24 @@ class SampleEntityController extends AbstractController
      * @var $connection
      */
     protected $connection;
+    /**
+     * @var $doctrine
+     */
+    protected $doctrine;
 
     /**
      * SampleEntityController constructor.
      * @param ParameterBagInterface $parameterBag
+     * @param ManagerRegistry $doctrine
      * @param SymfonyTplService $toolService
      * @param Connection $connection
      */
-    public function __construct(ParameterBagInterface $parameterBag, SymfonyTplService $toolService, Connection $connection)
+    public function __construct(ParameterBagInterface $parameterBag, ManagerRegistry $doctrine, SymfonyTplService $toolService, Connection $connection)
     {
         $this->parameters = $parameterBag;
         $this->toolService = $toolService;
         $this->connection = $connection;
+        $this->doctrine = $doctrine;
     }
 
     /**
@@ -57,7 +64,7 @@ class SampleEntityController extends AbstractController
      *
      * @return array
      */
-    public static function getSubscribedServices()
+    public static function getSubscribedServices(): array
     {
         return array_merge(parent::getSubscribedServices(),
         [
@@ -80,6 +87,14 @@ class SampleEntityController extends AbstractController
             ])->getContent();
 
         return new Response($view);
+    }
+
+    /**
+     * @return ManagerRegistry
+     */
+    public function getDoctrine()
+    {
+        return $this->doctrine;
     }
 
     /**
@@ -286,7 +301,7 @@ class SampleEntityController extends AbstractController
         $typeCode = 'SYMFONYTPL_TOOL_DELETE';
         $id = $request->get('id', null);
 
-        $translator = $this->get('translator');
+        $translator = $this->container->get('translator');
 
         $result = [
             'title' => 'SymfonyTpl',

@@ -1,4 +1,10 @@
 services:
+  SymfonyTpl\Controller\SymfonyTplController:
+    autowire: true
+    public: true,
+    arguments: ['@parameter_bag', '@service_container'],
+    calls:
+      - setContainer: ['@service_container']
   #registering a locale listener to use the melis platform language with higher priority
   App\Bundle\SymfonyTpl\EventListener\LocaleListener:
     arguments: ['@service_container']

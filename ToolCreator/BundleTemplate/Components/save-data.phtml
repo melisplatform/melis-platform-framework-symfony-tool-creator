@@ -14,7 +14,7 @@
             'message' => '',
             'errors' => []
         ];
-        $translator = $this->get('translator');
+        $translator = $this->container->get('translator');
         /**
         * Set transaction so that we can rollback
         * the db if there are some error occurred

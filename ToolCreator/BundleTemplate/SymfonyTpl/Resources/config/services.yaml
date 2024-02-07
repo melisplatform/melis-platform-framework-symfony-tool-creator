@@ -1,4 +1,10 @@
 services:
+  SymfonyTpl\Controller\SymfonyTplController:
+    autowire: true
+    public: true,
+    arguments: ['@parameter_bag', '@service_container'],
+    calls:
+      - setContainer: ['@service_container']
   #register custom service
   App\Bundle\SymfonyTpl\Service\SymfonyTplService:
     autowire: true

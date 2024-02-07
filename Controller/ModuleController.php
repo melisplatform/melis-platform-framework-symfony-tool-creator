@@ -4,6 +4,7 @@ namespace MelisPlatformFrameworkSymfonyToolCreator\Controller;
 
 use http\Exception\InvalidArgumentException;
 use MelisPlatformFrameworkSymfony\MelisServiceManager;
+use Psr\Container\ContainerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -21,11 +22,15 @@ class ModuleController extends AbstractController
     /**
      * @var MelisServiceManager
      */
-    private $melisServiceManager;
+    protected $melisServiceManager;
     /**
      * @var EventDispatcherInterface
      */
-    private $eventDispatcher;
+    protected $eventDispatcher;
+    /**
+     * @var ContainerInterface
+     */
+    protected $container;
 
     private $primary_table = '';
     private $pt_entity_name = '';
@@ -83,13 +88,26 @@ class ModuleController extends AbstractController
 
     /**
      * ModuleController constructor.
-     * @param $melisServiceManager
-     * @param $eventDispatcher
+     * @param ContainerInterface $container
+     * @param MelisServiceManager $melisServiceManager
+     * @param EventDispatcherInterface $eventDispatcher
      */
-    public function __construct(MelisServiceManager $melisServiceManager, EventDispatcherInterface $eventDispatcher)
+    public function __construct(ContainerInterface $container,
+                                MelisServiceManager $melisServiceManager,
+                                EventDispatcherInterface $eventDispatcher
+    )
     {
         $this->melisServiceManager = $melisServiceManager;
         $this->eventDispatcher = $eventDispatcher;
+        $this->container = $container;
+    }
+
+    /**
+     * @return array
+     */
+    public static function getSubscribedServices(): array
+    {
+        return parent::getSubscribedServices();
     }
 
     /**
@@ -354,8 +372,8 @@ class ModuleController extends AbstractController
     {
         try {
             $primaryKey = '';
-            if ($this->has('doctrine.dbal.default_connection')) {
-                $conn = $this->get('doctrine.dbal.default_connection');
+            if ($this->container->has('doctrine.dbal.default_connection')) {
+                $conn = $this->container->get('doctrine.dbal.default_connection');
                 $sm = $conn->getSchemaManager();
                 $table = $sm->listTableIndexes($tableName);
 
@@ -385,8 +403,8 @@ class ModuleController extends AbstractController
     {
         try {
             $columnType = [];
-            if ($this->has('doctrine.dbal.default_connection')) {
-                $conn = $this->get('doctrine.dbal.default_connection');
+            if ($this->container->has('doctrine.dbal.default_connection')) {
+                $conn = $this->container->get('doctrine.dbal.default_connection');
                 $sm = $conn->getSchemaManager();
                 $columns = $sm->listTableColumns($tableName);
 
@@ -410,8 +428,8 @@ class ModuleController extends AbstractController
     {
         try {
             $columnDefaultValue = [];
-            if ($this->has('doctrine.dbal.default_connection')) {
-                $conn = $this->get('doctrine.dbal.default_connection');
+            if ($this->container->has('doctrine.dbal.default_connection')) {
+                $conn = $this->container->get('doctrine.dbal.default_connection');
                 $sm = $conn->getSchemaManager();
                 $columns = $sm->listTableColumns($tableName);
                 foreach ($columns as $column) {
@@ -917,7 +935,8 @@ class ModuleController extends AbstractController
                      * Add connection to first table and secondary table
                      */
                     //Add connection to the first table entity with the second table entity
-                    $assoc = "\t/**\n\t".'* @ORM\OneToMany(targetEntity="'.$this->st_entity_name.'",mappedBy="'.$this->st_fk.'")'."\n\t*/";
+//                    $assoc = "\t/**\n\t".'* @ORM\OneToMany(targetEntity="'.$this->st_entity_name.'",mappedBy="'.$this->st_fk.'")'."\n\t*/";
+                    $assoc = "\t#"."[ORM\OneToMany(targetEntity:\"'.$this->st_entity_name.'\",mappedBy:\"'.$this->st_fk.'\")]";
                     $pt_getterSetter = $this->constructEntitySettersGetters($pt_getterSetter, $this->secondary_table, false, '', '\Doctrine\ORM\PersistentCollection', $assoc);
                 }
                 //Create primary table entity
@@ -941,7 +960,7 @@ class ModuleController extends AbstractController
      */
     public function updateController($modulePath)
     {
-        $controller_filename = $modulePath.'/Controller/SampleEntityController.php';
+        $controller_filename = $modulePath.'/Controller/SymfonyTplController.php';
         /**
          * Process Files for
          * secondary table
@@ -1121,14 +1140,18 @@ class ModuleController extends AbstractController
                 $refCOl = "tpl_id";
             }
             $type = "\\$entity";
-            $getterSetter .= "\t/**\n\t".'* @ORM\OneToOne(targetEntity="'.$entity.'")'."\n\t".
-                             '* @ORM\JoinColumn(name="'.$column.'", referencedColumnName="'.$refCOl.'")'."\n\t*/";
+//            $getterSetter .= "\t/**\n\t".'* @ORM\OneToOne(targetEntity="'.$entity.'")'."\n\t".
+//                             '* @ORM\JoinColumn(name="'.$column.'", referencedColumnName="'.$refCOl.'")'."\n\t*/";
+
+            $getterSetter .= "\n#".'[ORM\OneToOne(targetEntity:"'.$entity.'")]'."\n".
+                            "#".'[ORM\JoinColumn(name:"'.$column.'", referencedColumnName:"'.$refCOl.'")]';
 
             //stores identity column to exclude in the searchable cols
             $this->repoSearchIdentity[] = $column;
         }else{
             if($isPrimaryKey){
-                $getterSetter .= "/**\n\t* @ORM\Id()\n\t* @ORM\GeneratedValue()\n\t* @ORM\Column(type=\"integer\")\n\t*/";
+//                $getterSetter .= "/**\n\t* @ORM\Id()\n\t* @ORM\GeneratedValue()\n\t* @ORM\Column(type=\"integer\")\n\t*/";
+                $getterSetter .= "\n\t#".'[ORM\Id()]'."\n\t#".'[ORM\GeneratedValue()]'."\n\t#".'[ORM\Column(type:"integer")]';
                 $type = 'int';
             }else{
                 if(!$isPrimaryTable && $column == $this->st_fk){
@@ -1136,8 +1159,12 @@ class ModuleController extends AbstractController
                      * This is to add association to the second table
                      * foreign key to connect with the first table
                      */
-                    $getterSetter .= "\t/**\n\t".'* @ORM\ManyToOne(targetEntity="'.$this->pt_entity_name.'", inversedBy="'.$this->secondary_table.'")'."\n\t".
-                        '* @ORM\JoinColumn(name="'.$this->st_fk.'", referencedColumnName="'.$this->pt_pk.'")'."\n\t*/";
+//                    $getterSetter .= "\t/**\n\t".'* @ORM\ManyToOne(targetEntity="'.$this->pt_entity_name.'", inversedBy="'.$this->secondary_table.'")'."\n\t".
+//                        '* @ORM\JoinColumn(name="'.$this->st_fk.'", referencedColumnName="'.$this->pt_pk.'")'."\n\t*/";
+
+                    $getterSetter .= "\n#".'[ORM\ManyToOne(targetEntity:"'.$this->pt_entity_name.'", inversedBy:"'.$this->secondary_table.'")]'.
+                        "\n#".'[ORM\JoinColumn(name:"'.$this->st_fk.'", referencedColumnName:"'.$this->pt_pk.'")]';
+
                     $type = $this->pt_entity_name;
                 }else{
                     if(!empty($assoc)){
@@ -1161,10 +1188,12 @@ class ModuleController extends AbstractController
                                     $type = 'string';
                                     $colType = 'string';
                                 }
-                                $getterSetter .= "\t/**\n\t* @ORM\Column(type=\"".$colType."\")\n\t*/";
+//                                $getterSetter .= "\t/**\n\t* @ORM\Column(type=\"".$colType."\")\n\t*/";
+                                $getterSetter .= "\t#"."[ORM\Column(type:\"".$colType."\")]";
                             }
                         }else {
-                            $getterSetter .= "\t/**\n\t* @ORM\Column(type=\"string\")\n\t*/";
+//                            $getterSetter .= "\t/**\n\t* @ORM\Column(type=\"string\")\n\t*/";
+                            $getterSetter .= "\t#"."[ORM\Column(type:\"string\")]";
                         }
                     }
                 }
